@@ -57,15 +57,15 @@ export const getResponseData = (parameters: WebhookParameters) => {
 	return undefined;
 };
 
-export class CreateEntityNode implements INodeType {
+export class UpdateEntity implements INodeType {
 	description: INodeTypeDescription = {
-		displayName: 'Create Entity',
-		name: 'createEntity',
+		displayName: 'Update Entity',
+		name: 'updateEntity',
 		group: ['organization'],
 		version: 1,
-		description: 'Basic Example Node',
+		description: 'Update Entity',
 		defaults: {
-			name: 'Example Node',
+			name: 'Update Entity',
 		},
 		webhooks: [
 			{
