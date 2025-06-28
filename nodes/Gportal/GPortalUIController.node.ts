@@ -10,62 +10,15 @@ import { NodeConnectionType } from 'n8n-workflow';
 // import { Wait } from 'n8n-nodes-base';?
 const webhookPath = 'gportal';
 
-export type WebhookParameters = {
-	httpMethod: string | string[];
-	responseMode: string;
-	responseData: string;
-	responseCode?: number; //typeVersion <= 1.1
-	options?: {
-		responseData?: string;
-		responseCode?: {
-			values?: {
-				responseCode: number;
-				customCode?: number;
-			};
-		};
-		noResponseBody?: boolean;
-	};
-};
-export const getResponseCode = (parameters: WebhookParameters) => {
-	if (parameters.responseCode) {
-		return parameters.responseCode;
-	}
-	const responseCodeOptions = parameters.options;
-	if (responseCodeOptions?.responseCode?.values) {
-		const { responseCode, customCode } = responseCodeOptions.responseCode.values;
-
-		if (customCode) {
-			return customCode;
-		}
-
-		return responseCode;
-	}
-	return 200;
-};
-
-export const getResponseData = (parameters: WebhookParameters) => {
-	const { responseData, responseMode, options } = parameters;
-	if (responseData) return responseData;
-
-	if (responseMode === 'onReceived') {
-		const data = options?.responseData;
-		if (data) return data;
-	}
-
-	if (options?.noResponseBody) return 'noData';
-
-	return undefined;
-};
-
-export class CreateEntity implements INodeType {
+export class GPortalUIController implements INodeType {
 	description: INodeTypeDescription = {
-		displayName: 'Create Entity',
-		name: 'createEntity',
+		displayName: 'GPortal UI Controller',
+		name: 'gPortalUIController',
 		group: ['organization'],
 		version: 1,
-		description: 'Create Entity',
+		description: 'GPortal UI Controller',
 		defaults: {
-			name: 'Create Entity',
+			name: 'GPortal UI Controller',
 		},
 		webhooks: [
 			{
@@ -172,10 +125,12 @@ export class CreateEntity implements INodeType {
 	// with whatever the user has entered.
 	// You can make async calls and use `await`.
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
+		const context = this.getWorkflowDataProxy(0);
+
 		// const items = this.getInputData();
-		const executeData = this.getExecuteData();
+		// const executeData = this.getExecuteData();
 		// this.logger.info('executeData', executeData);
-		this.logger.info('executeData', executeData.data);
+		this.logger.info(`executeData: ${JSON.stringify(context.$execution.customData.getAll())}`);
 
 		this.sendMessageToUI('messsage heree');
 		// let item: INodeExecutionData;

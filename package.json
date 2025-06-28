@@ -37,10 +37,8 @@
       "dist/credentials/HttpBinApi.credentials.js"
     ],
     "nodes": [
-      "dist/nodes/ExampleNode/ExampleNode.node.js",
-      "dist/nodes/HttpBin/HttpBin.node.js",
-      "dist/nodes/Gportal/CreateEntity.node.js",
-      "dist/nodes/Gportal/UpdateEntity.node.js"
+      "dist/nodes/GPortal/GPortalCommunicator.node.js",
+      "dist/nodes/GPortal/GPortalUIController.node.js"
     ]
   },
   "devDependencies": {
