@@ -6,46 +6,83 @@ import type {
 } from 'n8n-workflow';
 import { NodeConnectionType } from 'n8n-workflow';
 // import { Wait } from 'n8n-nodes-base';?
-const webhookPath = 'gportal/communicator';
+// const webhookPath = 'gportal/communicator';
 
 export class GPortalCommunicator implements INodeType {
 	description: INodeTypeDescription = {
-		displayName: 'GPortal Communicator',
-		name: 'gPortalCommunicator',
+		displayName: 'REST API Trigger',
+		name: 'restApiTrigger',
+		icon: 'fa:broadcast-tower',
 		group: ['trigger'],
 		version: 1,
-		description: 'Triggers the workflow via a custom webhook',
+		subtitle: '= {{$parameter["path"]}}',
+		description: 'Starts a workflow when a custom REST API endpoint is called',
 		defaults: {
-			name: 'My Custom Webhook',
+			name: 'REST API Trigger',
 		},
+		// No inputs for a trigger node
 		inputs: [],
+		// We define one output, which will contain the data from the API call
 		outputs: [NodeConnectionType.Main],
+		// We don't need credentials for this simple example
 		credentials: [],
+		// This defines the core behavior of the trigger
 		webhooks: [
 			{
-				name: 'default',
-				httpMethod: 'POST',
-				responseMode: 'onReceived',
-				path: webhookPath, // URL path: /webhook/myCustomWebhook
+				name: 'default', // The name of the webhook definition
+				httpMethod: 'POST', // We'll listen for POST requests. Can be GET, PUT, etc.
+				responseMode: 'onReceived', // Send response immediately, don't wait for workflow to finish
+				path: '={{$parameter["path"]}}', // The URL path will be defined by a parameter in the UI
 			},
 		],
-		properties: [],
+		properties: [
+			// This property will be displayed in the n8n UI for the user to configure
+			{
+				displayName: 'Path',
+				name: 'path',
+				type: 'string',
+				default: 'my-custom-endpoint',
+				required: true,
+				placeholder: 'my-custom-endpoint',
+				description:
+					'The URL path to listen on. The full URL will be displayed after activating the workflow.',
+			},
+		],
 	};
 
+	// The webhook method is the function that n8n executes when your endpoint is called.
 	async webhook(this: IWebhookFunctions): Promise<IWebhookResponseData> {
+		// req = The incoming HTTP Request object (like in Express.js)
+		// res = The outgoing HTTP Response object
 		const req = this.getRequestObject();
-		const res = this.getResponseObject();
 
-		const data = {
+		// We want to return the request body, headers, and query parameters
+		// to the workflow so they can be used in subsequent nodes.
+		const responseData = {
 			headers: req.headers,
+			params: req.params,
 			query: req.query,
 			body: req.body,
 		};
 
-		res.status(200).json({ success: true, received: data });
+		const res = this.getResponseObject();
+		res.status(200).send('Hello World');
 
+		// The data must be returned in a special n8n structure.
+		// It's an array of objects, where each object has a 'json' key.
+		// This becomes the output of the node.
+		const workflowData = [
+			[
+				{
+					json: responseData,
+				},
+			],
+		];
+
+		// This tells n8n to start the workflow with the data we prepared.
 		return {
-			workflowData: [[]],
+			noWebhookResponse: true,
+			workflowData,
 		};
 	}
 }
