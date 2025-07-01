@@ -10,8 +10,8 @@ import { NodeConnectionType } from 'n8n-workflow';
 
 export class GPortalCommunicator implements INodeType {
 	description: INodeTypeDescription = {
-		displayName: 'REST API Trigger',
-		name: 'restApiTrigger',
+		displayName: 'GPortal Communicator',
+		name: 'gPortalCommunicator',
 		icon: 'fa:broadcast-tower',
 		group: ['trigger'],
 		version: 1,

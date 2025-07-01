@@ -10,10 +10,10 @@ import { NodeConnectionType } from 'n8n-workflow';
 // import { Wait } from 'n8n-nodes-base';?
 const webhookPath = 'gportal';
 
-export class GPortalUIController implements INodeType {
+export class GPortalUiController implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'GPortal UI Controller',
-		name: 'gPortalUIController',
+		name: 'gPortalUiController',
 		group: ['organization'],
 		version: 1,
 		description: 'GPortal UI Controller',
@@ -63,7 +63,7 @@ export class GPortalUIController implements INodeType {
 					},
 				],
 				default: 'create',
-				description: 'The action to perform',
+				description: 'Create',
 			},
 
 			// Step 2: Show additional fields based on the selected action

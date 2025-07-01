@@ -1,15 +1,15 @@
 {
   "name": "n8n-nodes-g-portal",
   "version": "0.1.0",
-  "description": "",
+  "description": "GPortal Nodes for n8n",
   "keywords": [
     "n8n-community-node-package"
   ],
   "license": "MIT",
   "homepage": "",
   "author": {
-    "name": "",
-    "email": ""
+    "name": "CHAU VO LUU HUONG",
+    "email": "chauvoluuhuong@gmail.com"
   },
   "repository": {
     "type": "git",
@@ -37,8 +37,7 @@
       "dist/credentials/HttpBinApi.credentials.js"
     ],
     "nodes": [
-      "dist/nodes/GPortal/GPortalCommunicator.node.js",
-      "dist/nodes/GPortal/GPortalUIController.node.js"
+      "dist/nodes/GPortal/GPortalCommunicator.node.js"
     ]
   },
   "devDependencies": {
