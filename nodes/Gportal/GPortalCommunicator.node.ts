@@ -5,8 +5,6 @@ import type {
 	IWebhookResponseData,
 } from 'n8n-workflow';
 import { NodeConnectionType } from 'n8n-workflow';
-// import { Wait } from 'n8n-nodes-base';?
-// const webhookPath = 'gportal/communicator';
 
 export class GPortalCommunicator implements INodeType {
 	description: INodeTypeDescription = {
