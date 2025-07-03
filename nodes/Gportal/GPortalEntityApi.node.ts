@@ -174,8 +174,8 @@ export class GPortalEntityApi implements INodeType {
 		const additionalFields = this.getNodeParameter('additionalFields', 0) as IDataObject;
 
 		let endpoint = '';
-		let method: 'GET' | 'POST' | 'PUT' | 'DELETE';
-		let body: IDataObject | string = {};
+		let method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+		let body: string = '{}';
 
 		for (let i = 0; i < items.length; i++) {
 			try {
@@ -196,7 +196,7 @@ export class GPortalEntityApi implements INodeType {
 						method = 'GET';
 						endpoint = '/generic-entities';
 					} else if (operation === 'update') {
-						method = 'PUT';
+						method = 'PATCH';
 						const entityId = this.getNodeParameter('entityId', i) as string;
 						endpoint = `/generic-entities/${entityId}`;
 						body = this.getNodeParameter('entityData', i) as string;
@@ -227,12 +227,28 @@ export class GPortalEntityApi implements INodeType {
 					qs,
 				};
 
-				this.logger.debug(`requestOptions: ${JSON.stringify(requestOptions)}`);
+				// Log detailed request information for debugging
+				const credentials = await this.getCredentials('gPortalApi');
+
+				const baseURL = credentials?.domain || 'No base URL found';
+				const fullURL = `${baseURL}${endpoint}`;
+
+				this.logger.info('=== REQUEST DEBUG INFO ===');
+				this.logger.info(`Base URL: ${baseURL}`);
+				this.logger.info(`Endpoint: ${endpoint}`);
+				this.logger.info(`Full URL: ${fullURL}`);
+				this.logger.info(`Method: ${method}`);
+				this.logger.info(`Query Parameters: ${JSON.stringify(qs)}`);
+				this.logger.info(`Request Options: ${JSON.stringify(requestOptions)}`);
+				this.logger.info(`credentials: ${JSON.stringify(credentials)}`);
+				this.logger.info('========================');
 
 				if (method !== 'GET' && method !== 'DELETE') {
-					requestOptions.body = body;
+					requestOptions.body = JSON.parse(body as string);
+					this.logger.info(`Request Body: ${JSON.stringify(body)}`);
 				}
-
+				// use this way to workaround Invalid URL if the sever isn't running at default port
+				requestOptions.url = fullURL;
 				const response = await this.helpers.httpRequest(requestOptions);
 
 				returnData.push({
