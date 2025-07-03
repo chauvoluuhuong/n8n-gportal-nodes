@@ -63,8 +63,7 @@ export class GPortalCommunicator implements INodeType {
 			body: req.body,
 		};
 
-		const res = this.getResponseObject();
-		res.status(200).send('Hello World');
+		// const res = this.getResponseObject();
 
 		// The data must be returned in a special n8n structure.
 		// It's an array of objects, where each object has a 'json' key.

@@ -32,9 +32,12 @@
   ],
   "n8n": {
     "n8nNodesApiVersion": 1,
-    "credentials": [],
+    "credentials": [
+      "dist/credentials/GPortalApi.credentials.js"
+    ],
     "nodes": [
-      "dist/nodes/GPortal/GPortalUiController.node.js"
+      "dist/nodes/GPortal/GPortalUiController.node.js",
+      "dist/nodes/GPortal/GPortalEntityApi.node.js"
     ]
   },
   "devDependencies": {
