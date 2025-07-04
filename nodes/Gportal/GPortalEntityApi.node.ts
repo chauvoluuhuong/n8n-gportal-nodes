@@ -13,8 +13,8 @@ export class GPortalEntityApi implements INodeType {
 		displayName: 'GPortal Entity API',
 		name: 'gPortalEntityApi',
 		icon: {
-			light: 'file:gportal.svg',
-			dark: 'file:gportal.svg',
+			light: 'file:icons/restApi.white.svg',
+			dark: 'file:icons/restApi.black.svg',
 		},
 		group: ['transform'],
 		version: 1,

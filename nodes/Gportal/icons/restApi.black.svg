@@ -1,0 +1,16 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" fill="none">
+  <!-- Left curly brace -->
+  <path d="M22 12c-4 0-6 2-6 6v6c0 2-1 4-4 4v4c3 0 4 2 4 4v6c0 4 2 6 6 6" stroke="#1F2937" stroke-width="2" fill="none"/>
+
+  <!-- Right curly brace -->
+  <path d="M42 12c4 0 6 2 6 6v6c0 2 1 4 4 4v4c-3 0-4 2-4 4v6c0 4-2 6-6 6" stroke="#1F2937" stroke-width="2" fill="none"/>
+
+  <!-- Left arrow -->
+  <path d="M20 32h-6m0 0l3-3m-3 3l3 3" stroke="#3B82F6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Right arrow -->
+  <path d="M44 32h6m0 0l-3-3m3 3l-3 3" stroke="#10B981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Label -->
+  <text x="32" y="58" text-anchor="middle" font-size="10" fill="#6B7280" font-family="sans-serif">REST API</text>
+</svg>

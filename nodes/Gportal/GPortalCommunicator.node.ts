@@ -10,7 +10,10 @@ export class GPortalCommunicator implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'GPortal Communicator',
 		name: 'gPortalCommunicator',
-		icon: 'fa:broadcast-tower',
+		icon: {
+			light: 'file:icons/communicator.white.svg',
+			dark: 'file:icons/communicator.black.svg',
+		},
 		group: ['trigger'],
 		version: 1,
 		subtitle: '= {{$parameter["path"]}}',
