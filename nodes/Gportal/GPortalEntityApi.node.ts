@@ -12,7 +12,10 @@ export class GPortalEntityApi implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'GPortal Entity API',
 		name: 'gPortalEntityApi',
-		icon: 'fa:database',
+		icon: {
+			light: 'file:gportal.svg',
+			dark: 'file:gportal.svg',
+		},
 		group: ['transform'],
 		version: 1,
 		subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',

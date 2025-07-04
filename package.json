@@ -37,7 +37,8 @@
     ],
     "nodes": [
       "dist/nodes/GPortal/GPortalUiController.node.js",
-      "dist/nodes/GPortal/GPortalEntityApi.node.js"
+      "dist/nodes/GPortal/GPortalEntityApi.node.js",
+      "dist/nodes/GPortal/GPortalJumper.node.js"
     ]
   },
   "devDependencies": {
