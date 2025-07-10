@@ -24,6 +24,12 @@ export class GPortalUiController implements INodeType {
 		defaults: {
 			name: 'GPortal UI Controller',
 		},
+		credentials: [
+			{
+				name: 'socketIOApi',
+				required: true,
+			},
+		],
 		webhooks: [
 			{
 				name: 'default',
@@ -54,55 +60,53 @@ export class GPortalUiController implements INodeType {
 				type: 'options',
 				options: [
 					{
-						name: 'Create',
-						value: 'create',
+						name: 'Create Entity',
+						value: 'createEntity',
 					},
+
 					{
-						name: 'Update',
-						value: 'update',
-					},
-					{
-						name: 'Delete',
-						value: 'delete',
+						name: 'Update Entity',
+						value: 'updateEntity',
 					},
 				],
-				default: 'create',
-				description: 'Create',
+				default: 'createEntity',
+				description: 'Create Entity',
 			},
-
-			// Step 2: Show additional fields based on the selected action
 			{
-				displayName: 'Create Name',
-				name: 'createName',
+				displayName: 'Entity Name',
+				name: 'entityName',
 				type: 'string',
 				default: '',
 				displayOptions: {
 					show: {
-						action: ['create'],
+						action: ['createEntity'],
 					},
 				},
+				description: 'The name of the entity to create',
 			},
 			{
-				displayName: 'Update ID',
-				name: 'updateId',
+				displayName: 'Version',
+				name: 'version',
 				type: 'string',
 				default: '',
 				displayOptions: {
 					show: {
-						action: ['update'],
+						action: ['createEntity'],
 					},
 				},
+				description: 'The version of the entity to create',
 			},
 			{
-				displayName: 'Delete ID',
-				name: 'deleteId',
+				displayName: 'Entity ID',
+				name: 'entityId',
 				type: 'string',
 				default: '',
 				displayOptions: {
 					show: {
-						action: ['delete'],
+						action: ['updateEntity'],
 					},
 				},
+				description: 'The ID of the entity to update',
 			},
 		],
 	};
