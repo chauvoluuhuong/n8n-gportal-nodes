@@ -5,6 +5,7 @@ import type {
 	INodeTypeDescription,
 	IWebhookFunctions,
 	IWebhookResponseData,
+	IHttpRequestOptions,
 } from 'n8n-workflow';
 import { NodeConnectionType } from 'n8n-workflow';
 // import { Wait } from 'n8n-nodes-base';?
@@ -26,10 +27,17 @@ export class GPortalUiController implements INodeType {
 		},
 		credentials: [
 			{
-				name: 'socketIOApi',
+				name: 'gPortalApi',
 				required: true,
 			},
 		],
+		requestDefaults: {
+			baseURL: '={{$credentials?.domain}}',
+			headers: {
+				Accept: 'application/json',
+				'Content-Type': 'application/json',
+			},
+		},
 		webhooks: [
 			{
 				name: 'default',
@@ -112,15 +120,59 @@ export class GPortalUiController implements INodeType {
 	};
 
 	async webhook(this: IWebhookFunctions): Promise<IWebhookResponseData> {
-		this.logger.info('>>>>>>>>>>>>>>>>>webhook');
-		// const resume = this.getNodeParameter('resume', 0) as string;
+		// Get current execution ID and node name
+		const currentExecutionId = this.getExecutionId();
+		const currentNodeName = this.getNode().name;
+
+		// Prepare the broadcast payload
+		const broadcastPayload = {
+			room: currentExecutionId,
+			eventName: 'execute-ui-command',
+			data: {
+				currentStepName: currentNodeName,
+			},
+		};
+
+		try {
+			// Get credentials
+			const credentials = await this.getCredentials('gPortalApi');
+			const baseURL = credentials?.domain || 'No base URL found';
+			const fullURL = `${baseURL}/socket/broadcast`;
+
+			this.logger.info('=== BROADCAST REQUEST DEBUG INFO ===');
+			this.logger.info(`Base URL: ${baseURL}`);
+			this.logger.info(`Full URL: ${fullURL}`);
+			this.logger.info(`Payload: ${JSON.stringify(broadcastPayload)}`);
+			this.logger.info('====================================');
+
+			// Make the broadcast request
+			const requestOptions: IHttpRequestOptions = {
+				method: 'POST',
+				url: fullURL,
+				body: broadcastPayload,
+				headers: {
+					Authorization: `Bearer ${credentials?.token}`,
+					'Content-Type': 'application/json',
+					Accept: 'application/json',
+				},
+			};
+
+			const response = await this.helpers.httpRequest(requestOptions);
+			this.logger.info(`Broadcast response: ${JSON.stringify(response)}`);
+		} catch (error) {
+			this.logger.error(`Error broadcasting to socket: ${error.message}`);
+			// Continue execution even if broadcast fails
+		}
 
 		return {
 			workflowData: [
 				[
 					{
 						json: {
-							message: 'Hello World',
+							message: 'Broadcast sent successfully',
+							executionId: currentExecutionId,
+							nodeName: currentNodeName,
+							broadcastSent: true,
 						},
 					},
 				],
@@ -146,13 +198,15 @@ export class GPortalUiController implements INodeType {
 		// let myString: string;
 		this.logger.info('before wait');
 		await this.putExecutionToWait(new Date(Date.now() + 99999999999));
-
 		this.logger.info('after wait');
 		return [
 			[
 				{
 					json: {
 						executedNodeName: 'CreateEntity',
+						broadcastSent: true,
+						executionId: this.getExecutionId(),
+						nodeName: this.getNode().name,
 					},
 				},
 			],
