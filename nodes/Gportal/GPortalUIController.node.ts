@@ -14,6 +14,10 @@ export class GPortalUiController implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'GPortal UI Controller',
 		name: 'gPortalUiController',
+		icon: {
+			light: 'file:icons/uiController.white.svg',
+			dark: 'file:icons/uiController.black.svg',
+		},
 		group: ['organization'],
 		version: 1,
 		description: 'GPortal UI Controller',
@@ -133,6 +137,7 @@ export class GPortalUiController implements INodeType {
 		this.logger.info(`executeData: ${JSON.stringify(context.$execution.customData.getAll())}`);
 
 		this.sendMessageToUI('messsage heree');
+
 		// let item: INodeExecutionData;
 		// let myString: string;
 		this.logger.info('before wait');
