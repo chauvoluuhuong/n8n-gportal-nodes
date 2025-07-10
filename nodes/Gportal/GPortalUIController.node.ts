@@ -124,6 +124,78 @@ export class GPortalUiController implements INodeType {
 		const currentExecutionId = this.getExecutionId();
 		const currentNodeName = this.getNode().name;
 
+		// // Prepare the broadcast payload
+		// const broadcastPayload = {
+		// 	room: currentExecutionId,
+		// 	eventName: 'execute-ui-command',
+		// 	data: {
+		// 		currentStepName: currentNodeName,
+		// 	},
+		// };
+
+		// try {
+		// 	// Get credentials
+		// 	const credentials = await this.getCredentials('gPortalApi');
+		// 	const baseURL = credentials?.domain || 'No base URL found';
+		// 	const fullURL = `${baseURL}/socket/broadcast`;
+
+		// 	this.logger.info('=== BROADCAST REQUEST DEBUG INFO ===');
+		// 	this.logger.info(`Base URL: ${baseURL}`);
+		// 	this.logger.info(`Full URL: ${fullURL}`);
+		// 	this.logger.info(`Payload: ${JSON.stringify(broadcastPayload)}`);
+		// 	this.logger.info('====================================');
+
+		// 	// Make the broadcast request
+		// 	const requestOptions: IHttpRequestOptions = {
+		// 		method: 'POST',
+		// 		url: fullURL,
+		// 		body: broadcastPayload,
+		// 		headers: {
+		// 			Authorization: `Bearer ${credentials?.token}`,
+		// 			'Content-Type': 'application/json',
+		// 			Accept: 'application/json',
+		// 		},
+		// 	};
+
+		// 	const response = await this.helpers.httpRequest(requestOptions);
+		// 	this.logger.info(`Broadcast response: ${JSON.stringify(response)}`);
+		// } catch (error) {
+		// 	this.logger.error(`Error broadcasting to socket: ${error.message}`);
+		// 	// Continue execution even if broadcast fails
+		// }
+
+		return {
+			workflowData: [
+				[
+					{
+						json: {
+							message: 'Broadcast sent successfully',
+							executionId: currentExecutionId,
+							nodeName: currentNodeName,
+							broadcastSent: true,
+						},
+					},
+				],
+			],
+		};
+	}
+
+	// The function below is responsible for actually doing whatever this node
+	// is supposed to do. In this case, we're just appending the `myString` property
+	// with whatever the user has entered.
+	// You can make async calls and use `await`.
+	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
+		const context = this.getWorkflowDataProxy(0);
+
+		// const items = this.getInputData();
+		// const executeData = this.getExecuteData();
+		// this.logger.info('executeData', executeData);
+		this.logger.info(`executeData: ${JSON.stringify(context.$execution.customData.getAll())}`);
+
+		// Get current execution ID and node name
+		const currentExecutionId = this.getExecutionId();
+		const currentNodeName = this.getNode().name;
+
 		// Prepare the broadcast payload
 		const broadcastPayload = {
 			room: currentExecutionId,
@@ -164,49 +236,21 @@ export class GPortalUiController implements INodeType {
 			// Continue execution even if broadcast fails
 		}
 
-		return {
-			workflowData: [
-				[
-					{
-						json: {
-							message: 'Broadcast sent successfully',
-							executionId: currentExecutionId,
-							nodeName: currentNodeName,
-							broadcastSent: true,
-						},
-					},
-				],
-			],
-		};
-	}
-
-	// The function below is responsible for actually doing whatever this node
-	// is supposed to do. In this case, we're just appending the `myString` property
-	// with whatever the user has entered.
-	// You can make async calls and use `await`.
-	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
-		const context = this.getWorkflowDataProxy(0);
-
-		// const items = this.getInputData();
-		// const executeData = this.getExecuteData();
-		// this.logger.info('executeData', executeData);
-		this.logger.info(`executeData: ${JSON.stringify(context.$execution.customData.getAll())}`);
-
-		this.sendMessageToUI('messsage heree');
-
 		// let item: INodeExecutionData;
 		// let myString: string;
 		this.logger.info('before wait');
 		await this.putExecutionToWait(new Date(Date.now() + 99999999999));
 		this.logger.info('after wait');
+
+		context.$execution.customData.set('currentNodeName', currentNodeName);
+		context.$execution.customData.set('executionId', this.getExecutionId());
+
 		return [
 			[
 				{
 					json: {
-						executedNodeName: 'CreateEntity',
-						broadcastSent: true,
+						currentNodeName: currentNodeName,
 						executionId: this.getExecutionId(),
-						nodeName: this.getNode().name,
 					},
 				},
 			],
