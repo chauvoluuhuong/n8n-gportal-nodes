@@ -1,0 +1,18 @@
+<svg width="80" height="80" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" fill="none">
+  <!-- Signal waves -->
+  <path d="M15 50c5-5 10-5 15-5s10 0 15 5" stroke="#FFFFFF" stroke-width="3" fill="none"/>
+  <path d="M15 40c8-8 15-8 22-8s15 0 22 8" stroke="#FFFFFF" stroke-width="3" fill="none"/>
+  <path d="M15 30c10-10 20-10 30-10s20 0 30 10" stroke="#FFFFFF" stroke-width="3" fill="none"/>
+
+  <!-- Message bubble -->
+  <rect x="50" y="25" width="20" height="15" rx="3" stroke="#FFFFFF" stroke-width="3" fill="none"/>
+  <path d="M60 40l-5 5-5-5" stroke="#FFFFFF" stroke-width="3" fill="none"/>
+
+  <!-- Connection dots -->
+  <circle cx="20" cy="60" r="3" fill="#FFFFFF"/>
+  <circle cx="30" cy="60" r="3" fill="#FFFFFF"/>
+  <circle cx="40" cy="60" r="3" fill="#FFFFFF"/>
+
+  <!-- Label -->
+  <text x="40" y="72" text-anchor="middle" font-size="12" fill="#FFFFFF" font-family="sans-serif">COMM</text>
+</svg>

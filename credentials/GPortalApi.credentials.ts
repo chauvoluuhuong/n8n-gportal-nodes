@@ -5,25 +5,27 @@ import {
 	INodeProperties,
 } from 'n8n-workflow';
 
-export class HttpBinApi implements ICredentialType {
-	name = 'httpbinApi';
-	displayName = 'HttpBin API';
+export class GPortalApi implements ICredentialType {
+	name = 'gPortalApi';
+	displayName = 'GPortal API';
 	documentationUrl = 'https://your-docs-url';
 	properties: INodeProperties[] = [
 		{
-			displayName: 'Token',
+			displayName: 'Bearer Token',
 			name: 'token',
 			type: 'string',
 			default: '',
 			typeOptions: {
 				password: true,
-			}
+			},
+			description: 'The bearer token for authentication',
 		},
 		{
-			displayName: 'Domain',
+			displayName: 'Base URL',
 			name: 'domain',
 			type: 'string',
-			default: 'https://httpbin.org',
+			default: 'http://103.124.95.129:8080/api/v1',
+			description: 'The base URL of the GPortal API',
 		},
 	];
 
@@ -44,7 +46,7 @@ export class HttpBinApi implements ICredentialType {
 	test: ICredentialTestRequest = {
 		request: {
 			baseURL: '={{$credentials?.domain}}',
-			url: '/bearer',
+			url: '/auth/profile',
 		},
 	};
 }
