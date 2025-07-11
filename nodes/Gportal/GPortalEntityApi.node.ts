@@ -7,6 +7,7 @@ import type {
 	IDataObject,
 } from 'n8n-workflow';
 import { NodeConnectionType, NodeOperationError } from 'n8n-workflow';
+import { loadRootFields } from './services';
 
 export class GPortalEntityApi implements INodeType {
 	description: INodeTypeDescription = {
@@ -125,6 +126,24 @@ export class GPortalEntityApi implements INodeType {
 				description: 'The entity data in JSON format',
 			},
 			{
+				displayName: 'Entity Name or ID',
+				name: 'entityName',
+				type: 'options',
+				typeOptions: {
+					loadOptionsMethod: 'loadRootFields',
+				},
+				default: '',
+				required: true,
+				displayOptions: {
+					show: {
+						operation: ['create'],
+						resource: ['entity'],
+					},
+				},
+				description:
+					'Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>',
+			},
+			{
 				displayName: 'Additional Fields',
 				name: 'additionalFields',
 				type: 'collection',
@@ -168,6 +187,12 @@ export class GPortalEntityApi implements INodeType {
 		],
 	};
 
+	methods = {
+		loadOptions: {
+			loadRootFields,
+		},
+	};
+
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
 		const items = this.getInputData();
 		const returnData: INodeExecutionData[] = [];
@@ -175,18 +200,27 @@ export class GPortalEntityApi implements INodeType {
 		const resource = this.getNodeParameter('resource', 0) as string;
 		const operation = this.getNodeParameter('operation', 0) as string;
 		const additionalFields = this.getNodeParameter('additionalFields', 0) as IDataObject;
-
 		let endpoint = '';
 		let method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
-		let body: string = '{}';
+		let body: IDataObject = {};
 
 		for (let i = 0; i < items.length; i++) {
 			try {
 				if (resource === 'entity') {
 					if (operation === 'create') {
+						const entityName = this.getNodeParameter('entityName', 0) as string;
+
 						method = 'POST';
 						endpoint = '/generic-entities';
-						body = this.getNodeParameter('entityData', i) as string;
+						const entityData = this.getNodeParameter('entityData', i) as string;
+
+						// Add entity name to the request body if provided
+						if (entityName) {
+							body.name = entityName;
+							body.value = JSON.parse(entityData);
+						} else {
+							throw new NodeOperationError(this.getNode(), `Entity name is required`);
+						}
 					} else if (operation === 'delete') {
 						method = 'DELETE';
 						const entityId = this.getNodeParameter('entityId', i) as string;
@@ -202,7 +236,7 @@ export class GPortalEntityApi implements INodeType {
 						method = 'PATCH';
 						const entityId = this.getNodeParameter('entityId', i) as string;
 						endpoint = `/generic-entities/${entityId}`;
-						body = this.getNodeParameter('entityData', i) as string;
+						body.value = JSON.parse(this.getNodeParameter('entityData', i) as string);
 					} else {
 						throw new NodeOperationError(this.getNode(), `Operation ${operation} not supported`);
 					}
@@ -247,7 +281,7 @@ export class GPortalEntityApi implements INodeType {
 				this.logger.info('========================');
 
 				if (method !== 'GET' && method !== 'DELETE') {
-					requestOptions.body = JSON.parse(body as string);
+					requestOptions.body = body;
 					this.logger.info(`Request Body: ${JSON.stringify(body)}`);
 				}
 				// use this way to workaround Invalid URL if the sever isn't running at default port

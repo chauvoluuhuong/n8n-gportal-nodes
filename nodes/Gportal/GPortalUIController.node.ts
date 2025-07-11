@@ -8,6 +8,7 @@ import type {
 	IHttpRequestOptions,
 } from 'n8n-workflow';
 import { NodeConnectionType } from 'n8n-workflow';
+import { loadRootFields } from './services';
 // import { Wait } from 'n8n-nodes-base';?
 const webhookPath = 'gportal';
 
@@ -81,16 +82,20 @@ export class GPortalUiController implements INodeType {
 				description: 'Create Entity',
 			},
 			{
-				displayName: 'Entity Name',
+				displayName: 'Entity Name or ID',
 				name: 'entityName',
-				type: 'string',
+				type: 'options',
+				typeOptions: {
+					loadOptionsMethod: 'loadRootFields',
+				},
 				default: '',
 				displayOptions: {
 					show: {
 						action: ['createEntity'],
 					},
 				},
-				description: 'The name of the entity to create',
+				description:
+					'Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>',
 			},
 			{
 				displayName: 'Version',
@@ -139,6 +144,12 @@ export class GPortalUiController implements INodeType {
 			],
 		};
 	}
+
+	methods = {
+		loadOptions: {
+			loadRootFields: loadRootFields,
+		},
+	};
 
 	// The function below is responsible for actually doing whatever this node
 	// is supposed to do. In this case, we're just appending the `myString` property
