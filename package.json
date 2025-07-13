@@ -9,11 +9,12 @@
   "homepage": "",
   "author": {
     "name": "CHAU VO LUU HUONG",
+    "email": "chauvoluuhuong@gmail.com""name": "CHAU VO LUU HUONG",
     "email": "chauvoluuhuong@gmail.com"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/chauvoluuhuong/n8n-gportal-nodes"
+    "url": "https://github.com/chauvoluuhuong/n8n-gportal-nodes""url": "https://github.com/chauvoluuhuong/n8n-gportal-nodes"
   },
   "engines": {
     "node": ">=20.15"
@@ -33,10 +34,11 @@
   "n8n": {
     "n8nNodesApiVersion": 1,
     "credentials": [
-      "dist/credentials/GPortalApi.credentials.js"
+      "dist/credentials/GPortalApi.credentials.js""dist/credentials/GPortalApi.credentials.js"
     ],
     "nodes": [
       "dist/nodes/GPortal/GPortalUiController.node.js",
+      "dist/nodes/GPortal/GPortalEntityApi.node.js""dist/nodes/GPortal/GPortalUiController.node.js",
       "dist/nodes/GPortal/GPortalEntityApi.node.js"
     ]
   },
