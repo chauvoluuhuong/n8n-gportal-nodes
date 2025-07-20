@@ -40,19 +40,18 @@ export class GPortalUiController implements INodeType {
 			},
 		},
 		webhooks: [
-			{
-				name: 'default',
-				httpMethod: 'GET',
-				responseMode: 'onReceived',
-				path: webhookPath,
-				restartWebhook: true,
-				isFullPath: true,
-			},
+			// {
+			// 	name: 'default',
+			// 	httpMethod: 'GET',
+			// 	responseMode: 'onReceived',
+			// 	path: webhookPath,
+			// 	restartWebhook: true,
+			// 	isFullPath: true,
+			// },
 			{
 				name: 'default',
 				httpMethod: 'POST',
-				// responseMode: '={{$parameter["responseMode"]}}',
-				// responseData: '={{$parameter["responseMode"] === "lastNode" ? "noData" : undefined}}',
+				responseMode: 'onReceived',
 				path: webhookPath,
 				restartWebhook: true,
 				isFullPath: true,
@@ -128,6 +127,12 @@ export class GPortalUiController implements INodeType {
 		// Get current execution ID and node name
 		const currentExecutionId = this.getExecutionId();
 		const currentNodeName = this.getNode().name;
+		// const requestObject = this.getRequestObject();
+		const params = this.getParamsData();
+		const requestObject = this.getRequestObject();
+		this.logger.info(`params: ${JSON.stringify(params)}`);
+		this.logger.info(`requestObject: ${JSON.stringify(requestObject.body || {})}`);
+		// this.logger.info(`requestObject: ${JSON.stringify(requestObject)}`);
 
 		return {
 			workflowData: [
@@ -138,6 +143,8 @@ export class GPortalUiController implements INodeType {
 							executionId: currentExecutionId,
 							nodeName: currentNodeName,
 							broadcastSent: true,
+							fromWebhook: true,
+							...(requestObject.body || {}),
 						},
 					},
 				],
@@ -239,14 +246,11 @@ export class GPortalUiController implements INodeType {
 
 		context.$execution.customData.set('currentNodeName', currentNodeName);
 		context.$execution.customData.set('executionId', this.getExecutionId());
-
+		// the output is sent from webhook handler
 		return [
 			[
 				{
-					json: {
-						currentNodeName: currentNodeName,
-						executionId: this.getExecutionId(),
-					},
+					json: {},
 				},
 			],
 		];
