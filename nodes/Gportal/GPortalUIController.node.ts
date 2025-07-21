@@ -190,9 +190,6 @@ export class GPortalUiController implements INodeType {
 		context.$execution.customData.set('currentNodeName', currentNodeName);
 		context.$execution.customData.set('executionId', this.getExecutionId());
 		if (inputData.length > 0 && inputData[0].json.lastNodeExecuted) {
-			this.logger.info(
-				`stored input data for last node executed: ${JSON.stringify(inputData[0].json)}`,
-			);
 			context.$execution.customData.set(
 				inputData[0].json.lastNodeExecuted,
 				JSON.stringify(inputData[0].json),
@@ -244,11 +241,7 @@ export class GPortalUiController implements INodeType {
 			// Continue execution even if broadcast fails
 		}
 
-		// let item: INodeExecutionData;
-		// let myString: string;
-		this.logger.info('before wait');
 		await this.putExecutionToWait(new Date(Date.now() + 99999999999));
-		this.logger.info('after wait');
 
 		// the output is sent from webhook handler
 		return [
