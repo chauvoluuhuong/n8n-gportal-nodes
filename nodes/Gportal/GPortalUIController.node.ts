@@ -132,14 +132,12 @@ export class GPortalUiController implements INodeType {
 		const requestObject = this.getRequestObject();
 		this.logger.info(`params: ${JSON.stringify(params)}`);
 		this.logger.info(`requestObject: ${JSON.stringify(requestObject.body || {})}`);
-		// this.logger.info(`requestObject: ${JSON.stringify(requestObject)}`);
 
 		return {
 			workflowData: [
 				[
 					{
 						json: {
-							message: 'Broadcast sent successfully',
 							executionId: currentExecutionId,
 							nodeName: currentNodeName,
 							broadcastSent: true,
