@@ -100,7 +100,7 @@ export class GPortalUiController implements INodeType {
 				displayName: 'Version',
 				name: 'version',
 				type: 'string',
-				default: '',
+				default: '0',
 				displayOptions: {
 					show: {
 						action: ['createEntity'],
