@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-g-portal",
-  "version": "0.1.7",
+  "version": "0.1.9",
   "description": "GPortal Nodes for n8n",
   "keywords": [
     "n8n-community-node-package"

@@ -139,7 +139,7 @@ export class GPortalUiController implements INodeType {
 					{
 						json: {
 							executionId: currentExecutionId,
-							nodeName: currentNodeName,
+							lastNodeExecuted: currentNodeName,
 							broadcastSent: true,
 							fromWebhook: true,
 							...(requestObject.body || {}),
@@ -162,11 +162,7 @@ export class GPortalUiController implements INodeType {
 	// You can make async calls and use `await`.
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
 		const context = this.getWorkflowDataProxy(0);
-
-		// const items = this.getInputData();
-		// const executeData = this.getExecuteData();
-		// this.logger.info('executeData', executeData);
-		this.logger.info(`executeData: ${JSON.stringify(context.$execution.customData.getAll())}`);
+		const inputData = this.getInputData();
 
 		// Get current execution ID and node name
 		const currentExecutionId = this.getExecutionId();
@@ -189,6 +185,18 @@ export class GPortalUiController implements INodeType {
 			}
 		} catch (error) {
 			this.logger.warn(`Could not get some parameters: ${error.message}`);
+		}
+
+		context.$execution.customData.set('currentNodeName', currentNodeName);
+		context.$execution.customData.set('executionId', this.getExecutionId());
+		if (inputData.length > 0 && inputData[0].json.lastNodeExecuted) {
+			this.logger.info(
+				`stored input data for last node executed: ${JSON.stringify(inputData[0].json)}`,
+			);
+			context.$execution.customData.set(
+				inputData[0].json.lastNodeExecuted,
+				JSON.stringify(inputData[0].json),
+			);
 		}
 
 		// Prepare the broadcast payload
@@ -242,8 +250,6 @@ export class GPortalUiController implements INodeType {
 		await this.putExecutionToWait(new Date(Date.now() + 99999999999));
 		this.logger.info('after wait');
 
-		context.$execution.customData.set('currentNodeName', currentNodeName);
-		context.$execution.customData.set('executionId', this.getExecutionId());
 		// the output is sent from webhook handler
 		return [
 			[
