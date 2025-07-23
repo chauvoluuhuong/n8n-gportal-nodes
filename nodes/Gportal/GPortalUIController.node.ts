@@ -120,6 +120,19 @@ export class GPortalUiController implements INodeType {
 				},
 				description: 'The ID of the entity to update',
 			},
+			{
+				displayName: 'Default Field Values',
+				name: 'defaultFieldValues',
+				type: 'json',
+				default: '{}',
+				description:
+					'Default values for entity fields in JSON format. Can use <a href="https://docs.n8n.io/code/expressions/">expressions</a> for dynamic values.',
+				displayOptions: {
+					show: {
+						action: ['createEntity', 'updateEntity'],
+					},
+				},
+			},
 		],
 	};
 
@@ -175,6 +188,7 @@ export class GPortalUiController implements INodeType {
 		let entityName = '';
 		let entityId = '';
 		let version = '';
+		let defaultFieldValues = {};
 
 		try {
 			if (action === 'createEntity') {
@@ -182,6 +196,21 @@ export class GPortalUiController implements INodeType {
 				version = this.getNodeParameter('version', 0) as string;
 			} else if (action === 'updateEntity') {
 				entityId = this.getNodeParameter('entityId', 0) as string;
+			}
+
+			// Get default field values (available for both actions)
+			const defaultFieldValuesParam = this.getNodeParameter(
+				'defaultFieldValues',
+				0,
+				'{}',
+			) as string;
+			try {
+				defaultFieldValues = JSON.parse(defaultFieldValuesParam);
+			} catch (parseError) {
+				this.logger.warn(
+					`Could not parse default field values JSON: ${parseError.message}. Using empty object.`,
+				);
+				defaultFieldValues = {};
 			}
 		} catch (error) {
 			this.logger.warn(`Could not get some parameters: ${error.message}`);
@@ -207,6 +236,7 @@ export class GPortalUiController implements INodeType {
 				entityName: entityName,
 				entityId: entityId,
 				version: version,
+				defaultFieldValues: defaultFieldValues,
 			},
 		};
 
