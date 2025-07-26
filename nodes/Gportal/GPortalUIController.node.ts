@@ -139,7 +139,6 @@ export class GPortalUiController implements INodeType {
 	async webhook(this: IWebhookFunctions): Promise<IWebhookResponseData> {
 		// Get current execution ID and node name
 		const currentExecutionId = this.getExecutionId();
-		const currentNodeName = this.getNode().name;
 		// const requestObject = this.getRequestObject();
 		const params = this.getParamsData();
 		const requestObject = this.getRequestObject();
@@ -152,9 +151,19 @@ export class GPortalUiController implements INodeType {
 					{
 						json: {
 							executionId: currentExecutionId,
-							lastNodeExecuted: currentNodeName,
-							broadcastSent: true,
-							fromWebhook: true,
+							/*
+                after G-portal moving to next step, it will post the current result as
+								 {
+						        nodeExecutionsData: {
+										[currentNodeName]: {
+											entityName: entityName,
+											entityId: entityId,
+											version: version,
+											defaultFieldValues: defaultFieldValues
+										}
+									}
+								 }
+							*/
 							...(requestObject.body || {}),
 						},
 					},
@@ -225,18 +234,29 @@ export class GPortalUiController implements INodeType {
 			);
 		}
 
+		let nodeExecutionsData: any = {};
+		if (typeof inputData[0].json?.nodeExecutionsData === 'object') {
+			nodeExecutionsData = inputData[0].json?.nodeExecutionsData;
+		}
 		// Prepare the broadcast payload
 		const broadcastPayload = {
 			room: currentExecutionId,
 			eventName: 'execute-ui-command',
 			data: {
 				currentStepName: currentNodeName,
+				currentAction: action,
+				workflowId: context.$workflow.id,
 				executionId: currentExecutionId,
-				action: action,
-				entityName: entityName,
-				entityId: entityId,
-				version: version,
-				defaultFieldValues: defaultFieldValues,
+				nodeExecutionsData: {
+					[currentNodeName]: {
+						entityName: entityName,
+						entityId: entityId,
+						version: version,
+						defaultFieldValues: defaultFieldValues,
+					},
+
+					...nodeExecutionsData,
+				},
 			},
 		};
 
