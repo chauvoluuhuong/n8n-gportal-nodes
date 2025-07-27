@@ -9,7 +9,8 @@ import type {
 } from 'n8n-workflow';
 import { NodeConnectionType } from 'n8n-workflow';
 import { loadRootFields } from './services';
-// import { Wait } from 'n8n-nodes-base';?
+import { omit } from 'lodash';
+
 const webhookPath = 'gportal';
 
 export class GPortalUiController implements INodeType {
@@ -219,7 +220,7 @@ export class GPortalUiController implements INodeType {
 				this.logger.warn(
 					`Could not parse default field values JSON: ${parseError.message}. Using empty object.`,
 				);
-				defaultFieldValues = {};
+				defaultFieldValues = defaultFieldValuesParam;
 			}
 		} catch (error) {
 			this.logger.warn(`Could not get some parameters: ${error.message}`);
@@ -234,10 +235,10 @@ export class GPortalUiController implements INodeType {
 			);
 		}
 
-		let nodeExecutionsData: any = {};
-		if (typeof inputData[0].json?.nodeExecutionsData === 'object') {
-			nodeExecutionsData = inputData[0].json?.nodeExecutionsData;
-		}
+		// let nodeExecutionsData: any = {};
+		// if (typeof inputData[0].json?.nodeExecutionsData === 'object') {
+		// 	nodeExecutionsData = inputData[0].json?.nodeExecutionsData;
+		// }
 		// Prepare the broadcast payload
 		const broadcastPayload = {
 			room: currentExecutionId,
@@ -255,7 +256,14 @@ export class GPortalUiController implements INodeType {
 						defaultFieldValues: defaultFieldValues,
 					},
 
-					...nodeExecutionsData,
+					...omit(inputData[0].json, [
+						'body',
+						'headers',
+						'query',
+						'params',
+						'webhookUrl',
+						'executionMode',
+					]),
 				},
 			},
 		};
