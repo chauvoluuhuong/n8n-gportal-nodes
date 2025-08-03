@@ -9,7 +9,8 @@ import type {
 } from 'n8n-workflow';
 import { NodeConnectionType } from 'n8n-workflow';
 import { loadRootFields } from './services';
-// import { Wait } from 'n8n-nodes-base';?
+import { omit } from 'lodash';
+
 const webhookPath = 'gportal';
 
 export class GPortalUiController implements INodeType {
@@ -100,7 +101,7 @@ export class GPortalUiController implements INodeType {
 				displayName: 'Version',
 				name: 'version',
 				type: 'string',
-				default: '',
+				default: '0',
 				displayOptions: {
 					show: {
 						action: ['createEntity'],
@@ -120,13 +121,25 @@ export class GPortalUiController implements INodeType {
 				},
 				description: 'The ID of the entity to update',
 			},
+			{
+				displayName: 'Default Field Values',
+				name: 'defaultFieldValues',
+				type: 'json',
+				default: '{}',
+				description:
+					'Default values for entity fields in JSON format. Can use <a href="https://docs.n8n.io/code/expressions/">expressions</a> for dynamic values.',
+				displayOptions: {
+					show: {
+						action: ['createEntity', 'updateEntity'],
+					},
+				},
+			},
 		],
 	};
 
 	async webhook(this: IWebhookFunctions): Promise<IWebhookResponseData> {
 		// Get current execution ID and node name
 		const currentExecutionId = this.getExecutionId();
-		const currentNodeName = this.getNode().name;
 		// const requestObject = this.getRequestObject();
 		const params = this.getParamsData();
 		const requestObject = this.getRequestObject();
@@ -139,9 +152,19 @@ export class GPortalUiController implements INodeType {
 					{
 						json: {
 							executionId: currentExecutionId,
-							nodeName: currentNodeName,
-							broadcastSent: true,
-							fromWebhook: true,
+							/*
+                after G-portal moving to next step, it will post the current result as
+								 {
+						        nodeExecutionsData: {
+										[currentNodeName]: {
+											entityName: entityName,
+											entityId: entityId,
+											version: version,
+											defaultFieldValues: defaultFieldValues
+										}
+									}
+								 }
+							*/
 							...(requestObject.body || {}),
 						},
 					},
@@ -162,11 +185,7 @@ export class GPortalUiController implements INodeType {
 	// You can make async calls and use `await`.
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
 		const context = this.getWorkflowDataProxy(0);
-
-		// const items = this.getInputData();
-		// const executeData = this.getExecuteData();
-		// this.logger.info('executeData', executeData);
-		this.logger.info(`executeData: ${JSON.stringify(context.$execution.customData.getAll())}`);
+		const inputData = this.getInputData();
 
 		// Get current execution ID and node name
 		const currentExecutionId = this.getExecutionId();
@@ -179,6 +198,7 @@ export class GPortalUiController implements INodeType {
 		let entityName = '';
 		let entityId = '';
 		let version = '';
+		let defaultFieldValues = {};
 
 		try {
 			if (action === 'createEntity') {
@@ -187,21 +207,64 @@ export class GPortalUiController implements INodeType {
 			} else if (action === 'updateEntity') {
 				entityId = this.getNodeParameter('entityId', 0) as string;
 			}
+
+			// Get default field values (available for both actions)
+			const defaultFieldValuesParam = this.getNodeParameter(
+				'defaultFieldValues',
+				0,
+				'{}',
+			) as string;
+			try {
+				defaultFieldValues = JSON.parse(defaultFieldValuesParam);
+			} catch (parseError) {
+				this.logger.warn(
+					`Could not parse default field values JSON: ${parseError.message}. Using empty object.`,
+				);
+				defaultFieldValues = defaultFieldValuesParam;
+			}
 		} catch (error) {
 			this.logger.warn(`Could not get some parameters: ${error.message}`);
 		}
 
+		context.$execution.customData.set('currentNodeName', currentNodeName);
+		context.$execution.customData.set('executionId', this.getExecutionId());
+		if (inputData.length > 0 && inputData[0].json.lastNodeExecuted) {
+			context.$execution.customData.set(
+				inputData[0].json.lastNodeExecuted,
+				JSON.stringify(inputData[0].json),
+			);
+		}
+
+		// let nodeExecutionsData: any = {};
+		// if (typeof inputData[0].json?.nodeExecutionsData === 'object') {
+		// 	nodeExecutionsData = inputData[0].json?.nodeExecutionsData;
+		// }
 		// Prepare the broadcast payload
 		const broadcastPayload = {
 			room: currentExecutionId,
 			eventName: 'execute-ui-command',
 			data: {
 				currentStepName: currentNodeName,
+				currentAction: action,
+				workflowId: context.$workflow.id,
 				executionId: currentExecutionId,
-				action: action,
-				entityName: entityName,
-				entityId: entityId,
-				version: version,
+				nodeExecutionsData: {
+					[currentNodeName]: {
+						entityName: entityName,
+						entityId: entityId,
+						version: version,
+						defaultFieldValues: defaultFieldValues,
+					},
+
+					...omit(inputData[0].json, [
+						'body',
+						'headers',
+						'query',
+						'params',
+						'webhookUrl',
+						'executionMode',
+					]),
+				},
 			},
 		};
 
@@ -236,14 +299,8 @@ export class GPortalUiController implements INodeType {
 			// Continue execution even if broadcast fails
 		}
 
-		// let item: INodeExecutionData;
-		// let myString: string;
-		this.logger.info('before wait');
 		await this.putExecutionToWait(new Date(Date.now() + 99999999999));
-		this.logger.info('after wait');
 
-		context.$execution.customData.set('currentNodeName', currentNodeName);
-		context.$execution.customData.set('executionId', this.getExecutionId());
 		// the output is sent from webhook handler
 		return [
 			[
