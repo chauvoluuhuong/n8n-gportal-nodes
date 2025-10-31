@@ -1,0 +1,704 @@
+{
+  "name": "AUTOMATE CRM DEMO",
+  "nodes": [
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nfor (const item of $input.all()) {\n  item.json.myNewField = 1;\n}\n\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -640,
+        -720
+      ],
+      "id": "c48b18e1-04e4-4a0a-b7eb-ff0cd7254db6",
+      "name": "normalizeUserInfo"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "additionalFields": {
+          "queryParameters": {
+            "parameters": [
+              {}
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-g-portal.gPortalEntityApi",
+      "typeVersion": 1,
+      "position": [
+        -420,
+        -720
+      ],
+      "id": "21dd8d8d-cb6e-4420-833d-462e240d725e",
+      "name": "IsUserExisted",
+      "credentials": {
+        "gPortalApi": {
+          "id": "JEnmJT0zXLu1aYJQ",
+          "name": "GPortal account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "99d14d87-5025-4fe9-b8b5-825585200d05",
+              "leftValue": "",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -200,
+        -720
+      ],
+      "id": "1b62d9ca-ac03-4d0b-9bb2-50afb6812310",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "entityName": "ticket",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-g-portal.gPortalEntityApi",
+      "typeVersion": 1,
+      "position": [
+        20,
+        -620
+      ],
+      "id": "a3d36214-a411-48b8-8abe-9f0a8cc09d60",
+      "name": "createUser",
+      "credentials": {
+        "gPortalApi": {
+          "id": "JEnmJT0zXLu1aYJQ",
+          "name": "GPortal account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "entityId": "1",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-g-portal.gPortalEntityApi",
+      "typeVersion": 1,
+      "position": [
+        20,
+        -820
+      ],
+      "id": "2e4fe51f-9cd6-4a59-9c9d-73ac4e212281",
+      "name": "updateUser",
+      "credentials": {
+        "gPortalApi": {
+          "id": "JEnmJT0zXLu1aYJQ",
+          "name": "GPortal account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        -1328,
+        -620
+      ],
+      "id": "7ce2c670-e594-4969-be8d-27d51c02a048",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -1500,
+        -400
+      ],
+      "id": "24aada06-43da-455d-9285-b303ca9276dd",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "1qtYw25LTUBN44SL",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -1320,
+        -400
+      ],
+      "id": "c5643d38-458b-485e-9df2-bd0d9a9b6eaf",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "action",
+                    "rightValue": "createUser",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "7785a253-f772-49de-b380-81790951a4e1"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "b96b040e-1f2d-4ad6-a593-7e98768f6573",
+                    "leftValue": "action",
+                    "rightValue": "createTicket",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "f6c96ba9-460b-4977-9b99-273338e640fa",
+                    "leftValue": "action",
+                    "rightValue": "notifyTeammember",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -860,
+        -520
+      ],
+      "id": "e27b3576-cf42-4c88-89c5-eb300ca26b1c",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "entityName": "ticket",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-g-portal.gPortalEntityApi",
+      "typeVersion": 1,
+      "position": [
+        -840,
+        -1020
+      ],
+      "id": "bcbaaf53-a6eb-40d7-a202-d2f3aac0ff1d",
+      "name": "rawChatHistory",
+      "credentials": {
+        "gPortalApi": {
+          "id": "JEnmJT0zXLu1aYJQ",
+          "name": "GPortal account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "Scrape single URL"
+      },
+      "type": "@apify/n8n-nodes-apify.apify",
+      "typeVersion": 1,
+      "position": [
+        -560,
+        860
+      ],
+      "id": "5e830607-0391-4af0-b6af-79fb9627b603",
+      "name": "Facebook",
+      "credentials": {
+        "apifyApi": {
+          "id": "wHWpfmioUjJGSfDj",
+          "name": "Apify account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-g-portal.gPortalEntityApi",
+      "typeVersion": 1,
+      "position": [
+        900,
+        740
+      ],
+      "id": "a358800c-4701-4092-8b40-bc9702d37f6c",
+      "name": "user",
+      "credentials": {
+        "gPortalApi": {
+          "id": "JEnmJT0zXLu1aYJQ",
+          "name": "GPortal account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-g-portal.gPortalEntityApi",
+      "typeVersion": 1,
+      "position": [
+        900,
+        960
+      ],
+      "id": "3bdc432f-b6cb-46c2-8f4a-402a33805238",
+      "name": "post",
+      "credentials": {
+        "gPortalApi": {
+          "id": "JEnmJT0zXLu1aYJQ",
+          "name": "GPortal account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nfor (const item of $input.all()) {\n  item.json.myNewField = 1;\n}\n\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        860
+      ],
+      "id": "08fe39ba-aa09-4692-a33e-c3fb473794f3",
+      "name": "normalizeData"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        -220,
+        860
+      ],
+      "id": "3998eea7-2358-46c4-a708-504910bd1c34",
+      "name": "requestSoftWare"
+    },
+    {
+      "parameters": {
+        "content": "## Create Or Update User",
+        "height": 360,
+        "width": 960
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -680,
+        -840
+      ],
+      "id": "3bfa698c-ad49-4ea7-ab8b-beea9db3d4b6",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "entityName": "Ticket",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-g-portal.gPortalEntityApi",
+      "typeVersion": 1,
+      "position": [
+        -620,
+        -360
+      ],
+      "id": "4d47509c-e181-4452-9f0b-3c54aa9c3fa7",
+      "name": "create new ticket",
+      "credentials": {
+        "gPortalApi": {
+          "id": "JEnmJT0zXLu1aYJQ",
+          "name": "GPortal account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "gportal.com/products",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        -1200,
+        -400
+      ],
+      "id": "7943ec15-4e5c-4328-8306-c879b5a33e4b",
+      "name": "Get product knowledge base"
+    },
+    {
+      "parameters": {
+        "resource": "chat",
+        "chatId": "1"
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -340,
+        -360
+      ],
+      "id": "b89d2d5c-bc5d-4150-86d1-0020ecc13fac",
+      "name": "Notify to team",
+      "webhookId": "9cff0f64-4a3a-46b0-acfe-c4eef3a05585",
+      "credentials": {
+        "telegramApi": {
+          "id": "Wh8VSGE0uauowtXy",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## The agent get knowledge G-Portal and create ticket",
+        "height": 620,
+        "width": 720,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1600,
+        -760
+      ],
+      "id": "dc49f84b-87df-452c-8006-578ac891d6fc",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "url": "gportal.com/policies",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        -1040,
+        -400
+      ],
+      "id": "cd49b3e3-7f58-491b-8556-7f4a79f2e380",
+      "name": "get policies knowledge base"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "entityName": "ticket",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-g-portal.gPortalEntityApi",
+      "typeVersion": 1,
+      "position": [
+        -460,
+        20
+      ],
+      "id": "db5e9111-0497-4a1f-b48e-ec5a5c962a78",
+      "name": "createNewMeeting",
+      "credentials": {
+        "gPortalApi": {
+          "id": "JEnmJT0zXLu1aYJQ",
+          "name": "GPortal account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Create new ticket and notify to team member",
+        "height": 320,
+        "width": 540
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -660,
+        -440
+      ],
+      "id": "d9fdd5d3-0105-405a-bd20-09f3c54c07b7",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## When user need to schedule a meeting",
+        "height": 300,
+        "width": 520
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -680,
+        -40
+      ],
+      "id": "00f13773-2801-4479-8851-8fe1f3aa2915",
+      "name": "Sticky Note3"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "normalizeUserInfo": {
+      "main": [
+        [
+          {
+            "node": "IsUserExisted",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IsUserExisted": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "updateUser",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "createUser",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "rawChatHistory",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "normalizeUserInfo",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "create new ticket",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "createNewMeeting",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Facebook": {
+      "main": [
+        [
+          {
+            "node": "requestSoftWare",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "post": {
+      "main": [
+        []
+      ]
+    },
+    "normalizeData": {
+      "main": [
+        [
+          {
+            "node": "user",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "requestSoftWare": {
+      "main": [
+        [
+          {
+            "node": "normalizeData",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get product knowledge base": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get policies knowledge base": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "create new ticket": {
+      "main": [
+        [
+          {
+            "node": "Notify to team",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "a6074d35-04a6-4192-9acc-39600019fd37",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "170271d6c07639def518158728f7c15a4f2dced00d7a900fb682a49e6d618c63"
+  },
+  "id": "mgARFxD1UHTIfX8U",
+  "tags": []
+}

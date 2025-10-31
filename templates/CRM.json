@@ -1,0 +1,161 @@
+{
+  "name": "CRM",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "={{ $workflow.id }}",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "5a19256d-7323-4058-a943-a8d6b0a56bb3",
+      "name": "Webhook",
+      "webhookId": "1a1a81d6-21ff-425c-a9f5-12e8b15c4087"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"executionId\": \"{{$execution.id}}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        220,
+        0
+      ],
+      "id": "f026167d-8d73-4268-ae0a-476be97c3941",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "entityName": "Issue"
+      },
+      "type": "n8n-nodes-g-portal.gPortalUiController",
+      "typeVersion": 1,
+      "position": [
+        480,
+        0
+      ],
+      "id": "9706486f-9652-4c4d-858a-136f489bf8c9",
+      "name": "createCustomer",
+      "webhookId": "2288c4c4-3f3d-4d20-b410-5b04681ee4cb",
+      "credentials": {
+        "gPortalApi": {
+          "id": "JEnmJT0zXLu1aYJQ",
+          "name": "GPortal account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "entityName": "Issue"
+      },
+      "type": "n8n-nodes-g-portal.gPortalUiController",
+      "typeVersion": 1,
+      "position": [
+        720,
+        20
+      ],
+      "id": "1d70b602-3b3c-41da-9c2a-139d2340889b",
+      "name": "createIusse",
+      "webhookId": "2288c4c4-3f3d-4d20-b410-5b04681ee4cb",
+      "credentials": {
+        "gPortalApi": {
+          "id": "JEnmJT0zXLu1aYJQ",
+          "name": "GPortal account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "entityName": "Ticket"
+      },
+      "type": "n8n-nodes-g-portal.gPortalUiController",
+      "typeVersion": 1,
+      "position": [
+        980,
+        0
+      ],
+      "id": "37caae85-b2bb-4606-993a-a9eb3f0bec7d",
+      "name": "createTicket",
+      "webhookId": "2288c4c4-3f3d-4d20-b410-5b04681ee4cb",
+      "credentials": {
+        "gPortalApi": {
+          "id": "JEnmJT0zXLu1aYJQ",
+          "name": "GPortal account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond to Webhook": {
+      "main": [
+        [
+          {
+            "node": "createCustomer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "createCustomer": {
+      "main": [
+        [
+          {
+            "node": "createIusse",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "createIusse": {
+      "main": [
+        [
+          {
+            "node": "createTicket",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "d18f8caf-c3f4-4f0a-9f2b-9d92d83505e4",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "170271d6c07639def518158728f7c15a4f2dced00d7a900fb682a49e6d618c63"
+  },
+  "id": "2wW8kwrCaABOtkW9",
+  "tags": [
+    {
+      "createdAt": "2025-08-31T09:51:23.623Z",
+      "updatedAt": "2025-08-31T09:51:23.623Z",
+      "id": "1gQVdzA71cHoTktk",
+      "name": "GPortal"
+    }
+  ]
+}
