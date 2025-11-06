@@ -24,6 +24,7 @@ export class GPortalEntityApi implements INodeType {
 		defaults: {
 			name: 'GPortal Entity API',
 		},
+		usableAsTool: true,
 		inputs: [NodeConnectionType.Main],
 		outputs: [NodeConnectionType.Main],
 		credentials: [
