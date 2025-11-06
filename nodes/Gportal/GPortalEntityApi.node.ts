@@ -218,7 +218,27 @@ export class GPortalEntityApi implements INodeType {
 						// Add entity name to the request body if provided
 						if (entityName) {
 							body.name = entityName;
-							body.value = JSON.parse(entityData);
+							this.logger.info(`entityData: ${JSON.stringify(entityData)}`);
+
+							// Check if entityData is already a JSON object
+							if (typeof entityData === 'object' && entityData !== null) {
+								body.value = entityData;
+							} else if (typeof entityData === 'string') {
+								// Try to parse if it's a string
+								try {
+									body.value = JSON.parse(entityData);
+								} catch (parseError) {
+									throw new NodeOperationError(
+										this.getNode(),
+										`Entity data must be a valid JSON object or JSON string. Parse error: ${parseError.message}`,
+									);
+								}
+							} else {
+								throw new NodeOperationError(
+									this.getNode(),
+									`Entity data must be a JSON object or a valid JSON string, but received: ${typeof entityData}`,
+								);
+							}
 						} else {
 							throw new NodeOperationError(this.getNode(), `Entity name is required`);
 						}
@@ -237,7 +257,27 @@ export class GPortalEntityApi implements INodeType {
 						method = 'PATCH';
 						const entityId = this.getNodeParameter('entityId', i) as string;
 						endpoint = `/generic-entities/${entityId}`;
-						body.value = JSON.parse(this.getNodeParameter('entityData', i) as string);
+						const entityData = this.getNodeParameter('entityData', i);
+
+						// Check if entityData is already a JSON object
+						if (typeof entityData === 'object' && entityData !== null) {
+							body.value = entityData;
+						} else if (typeof entityData === 'string') {
+							// Try to parse if it's a string
+							try {
+								body.value = JSON.parse(entityData);
+							} catch (parseError) {
+								throw new NodeOperationError(
+									this.getNode(),
+									`Entity data must be a valid JSON object or JSON string. Parse error: ${parseError.message}`,
+								);
+							}
+						} else {
+							throw new NodeOperationError(
+								this.getNode(),
+								`Entity data must be a JSON object or a valid JSON string, but received: ${typeof entityData}`,
+							);
+						}
 					} else {
 						throw new NodeOperationError(this.getNode(), `Operation ${operation} not supported`);
 					}
