@@ -159,6 +159,22 @@ export class GPortalEntityApi implements INodeType {
 					'Search parameters in JSON format. Structure: { "paramName": value }. Example: { "status": "active", "category": "A" }',
 			},
 			{
+				displayName: 'Limit',
+				name: 'limit',
+				type: 'number',
+				typeOptions: {
+					minValue: 1,
+				},
+				default: 50,
+				displayOptions: {
+					show: {
+						operation: ['getMany'],
+						resource: ['entity'],
+					},
+				},
+				description: 'Max number of results to return',
+			},
+			{
 				displayName: 'Additional Fields',
 				name: 'additionalFields',
 				type: 'collection',
@@ -272,6 +288,7 @@ export class GPortalEntityApi implements INodeType {
 						const entityName = this.getNodeParameter('entityName', i) as string;
 						const searchParameters =
 							this.getNodeParameter('searchParameters', i) || ('{}' as string);
+						const limit = this.getNodeParameter('limit', i) as number | undefined;
 
 						endpoint = '/generic-entities';
 						// Parse and structure search parameters
@@ -306,6 +323,11 @@ export class GPortalEntityApi implements INodeType {
 								name: entityName,
 								...searchFields,
 							};
+						}
+
+						// Add limit to query parameters if provided
+						if (limit !== undefined && limit !== null) {
+							qs.limit = limit;
 						}
 					} else if (operation === 'update') {
 						method = 'PATCH';
