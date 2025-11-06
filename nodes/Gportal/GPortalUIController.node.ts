@@ -13,10 +13,11 @@ import { omit } from 'lodash';
 
 const webhookPath = 'gportal';
 
-export class GPortalUiController implements INodeType {
+export class GPortalUIController implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'GPortal UI Controller',
-		name: 'gPortalUiController',
+		// eslint-disable-next-line n8n-nodes-base/node-class-description-name-miscased
+		name: 'gPortalUIController',
 		icon: {
 			light: 'file:icons/uiController.white.svg',
 			dark: 'file:icons/uiController.black.svg',

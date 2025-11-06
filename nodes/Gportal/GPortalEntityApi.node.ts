@@ -24,6 +24,7 @@ export class GPortalEntityApi implements INodeType {
 		defaults: {
 			name: 'GPortal Entity API',
 		},
+		usableAsTool: true,
 		inputs: [NodeConnectionType.Main],
 		outputs: [NodeConnectionType.Main],
 		credentials: [
@@ -77,16 +78,16 @@ export class GPortalEntityApi implements INodeType {
 						action: 'Delete an entity',
 					},
 					{
-						name: 'Get',
-						value: 'get',
-						description: 'Get an entity by ID',
-						action: 'Get an entity by ID',
+						name: 'Get Many',
+						value: 'getMany',
+						description: 'Get many entities with search parameters',
+						action: 'Get many entities',
 					},
 					{
-						name: 'Get Many',
-						value: 'getAll',
-						description: 'Get many entities',
-						action: 'Get many entities',
+						name: 'Get One',
+						value: 'getOne',
+						description: 'Get an entity by ID',
+						action: 'Get an entity by ID',
 					},
 					{
 						name: 'Update',
@@ -95,7 +96,7 @@ export class GPortalEntityApi implements INodeType {
 						action: 'Update an entity',
 					},
 				],
-				default: 'get',
+				default: 'getOne',
 			},
 			{
 				displayName: 'Entity ID',
@@ -105,7 +106,7 @@ export class GPortalEntityApi implements INodeType {
 				required: true,
 				displayOptions: {
 					show: {
-						operation: ['delete', 'get', 'update'],
+						operation: ['delete', 'getOne', 'update'],
 						resource: ['entity'],
 					},
 				},
@@ -136,12 +137,55 @@ export class GPortalEntityApi implements INodeType {
 				required: true,
 				displayOptions: {
 					show: {
-						operation: ['create'],
+						operation: ['create', 'getMany'],
 						resource: ['entity'],
 					},
 				},
 				description:
 					'Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>',
+			},
+			{
+				displayName: 'Search Parameters',
+				name: 'searchParameters',
+				type: 'json',
+				default: '{}',
+				displayOptions: {
+					show: {
+						operation: ['getMany'],
+						resource: ['entity'],
+					},
+				},
+				description:
+					'Search parameters in JSON format. Structure: { "paramName": value }. Example: { "status": "active", "category": "A" }',
+			},
+			{
+				displayName: 'Limit',
+				name: 'limit',
+				type: 'number',
+				typeOptions: {
+					minValue: 1,
+				},
+				default: 50,
+				displayOptions: {
+					show: {
+						operation: ['getMany'],
+						resource: ['entity'],
+					},
+				},
+				description: 'Max number of results to return',
+			},
+			{
+				displayName: 'Version',
+				name: 'version',
+				type: 'string',
+				default: '0',
+				displayOptions: {
+					show: {
+						operation: ['getMany'],
+						resource: ['entity'],
+					},
+				},
+				description: 'Version to include in search fields',
 			},
 			{
 				displayName: 'Additional Fields',
@@ -206,6 +250,9 @@ export class GPortalEntityApi implements INodeType {
 
 		for (let i = 0; i < items.length; i++) {
 			try {
+				const qs: IDataObject = {};
+				body = {};
+
 				if (resource === 'entity') {
 					if (operation === 'create') {
 						const entityName = this.getNodeParameter('entityName', 0) as string;
@@ -217,7 +264,27 @@ export class GPortalEntityApi implements INodeType {
 						// Add entity name to the request body if provided
 						if (entityName) {
 							body.name = entityName;
-							body.value = JSON.parse(entityData);
+							this.logger.info(`entityData: ${JSON.stringify(entityData)}`);
+
+							// Check if entityData is already a JSON object
+							if (typeof entityData === 'object' && entityData !== null) {
+								body.value = entityData;
+							} else if (typeof entityData === 'string') {
+								// Try to parse if it's a string
+								try {
+									body.value = JSON.parse(entityData);
+								} catch (parseError) {
+									throw new NodeOperationError(
+										this.getNode(),
+										`Entity data must be a valid JSON object or JSON string. Parse error: ${parseError.message}`,
+									);
+								}
+							} else {
+								throw new NodeOperationError(
+									this.getNode(),
+									`Entity data must be a JSON object or a valid JSON string, but received: ${typeof entityData}`,
+								);
+							}
 						} else {
 							throw new NodeOperationError(this.getNode(), `Entity name is required`);
 						}
@@ -225,18 +292,89 @@ export class GPortalEntityApi implements INodeType {
 						method = 'DELETE';
 						const entityId = this.getNodeParameter('entityId', i) as string;
 						endpoint = `/generic-entities/${entityId}`;
-					} else if (operation === 'get') {
+					} else if (operation === 'getOne') {
 						method = 'GET';
 						const entityId = this.getNodeParameter('entityId', i) as string;
 						endpoint = `/generic-entities/${entityId}`;
-					} else if (operation === 'getAll') {
+					} else if (operation === 'getMany') {
 						method = 'GET';
+						const entityName = this.getNodeParameter('entityName', i) as string;
+						const searchParameters =
+							this.getNodeParameter('searchParameters', i) || ('{}' as string);
+						const limit = this.getNodeParameter('limit', i) as number | undefined;
+						const version = this.getNodeParameter('version', i) as string | undefined;
+
 						endpoint = '/generic-entities';
+						// Parse and structure search parameters
+						let searchFields: IDataObject = {
+							name: entityName,
+						};
+
+						// Add version to searchFields if provided
+						if (version !== undefined && version !== null && version !== '') {
+							searchFields.version = version;
+						}
+
+						if (searchParameters) {
+							// Try to parse search parameters
+							try {
+								const parsedParams =
+									typeof searchParameters === 'string'
+										? JSON.parse(searchParameters)
+										: searchParameters;
+
+								// Structure as { "searchFields": { "paramName": value } }
+								if (typeof parsedParams === 'object' && parsedParams !== null) {
+									searchFields = {
+										...searchFields,
+										...parsedParams,
+									};
+								}
+							} catch (parseError) {
+								throw new NodeOperationError(
+									this.getNode(),
+									`Search parameters must be a valid JSON object. Parse error: ${parseError.message}`,
+								);
+							}
+						}
+
+						// const normalizedSearchField: any = {};
+						// for (const [key, value] of Object.entries(searchFields)) {
+						// 	normalizedSearchField[`value.${key}`] = value;
+						// }
+
+						// Structure search parameters as { "searchFields": { "paramName": value } } in query params
+						qs.searchFields = searchFields;
+
+						// Add limit to query parameters if provided
+						if (limit !== undefined && limit !== null) {
+							qs.limit = limit;
+						}
 					} else if (operation === 'update') {
 						method = 'PATCH';
 						const entityId = this.getNodeParameter('entityId', i) as string;
 						endpoint = `/generic-entities/${entityId}`;
-						body.value = JSON.parse(this.getNodeParameter('entityData', i) as string);
+						const entityData = this.getNodeParameter('entityData', i);
+
+						// Check if entityData is already a JSON object
+						if (typeof entityData === 'object' && entityData !== null) {
+							body.value = entityData;
+						} else if (typeof entityData === 'string') {
+							// Try to parse if it's a string
+							try {
+								body.value = JSON.parse(entityData);
+							} catch (parseError) {
+								throw new NodeOperationError(
+									this.getNode(),
+									`Entity data must be a valid JSON object or JSON string. Parse error: ${parseError.message}`,
+								);
+							}
+						} else {
+							throw new NodeOperationError(
+								this.getNode(),
+								`Entity data must be a JSON object or a valid JSON string, but received: ${typeof entityData}`,
+							);
+						}
 					} else {
 						throw new NodeOperationError(this.getNode(), `Operation ${operation} not supported`);
 					}
@@ -244,16 +382,17 @@ export class GPortalEntityApi implements INodeType {
 					throw new NodeOperationError(this.getNode(), `Resource ${resource} not supported`);
 				}
 
-				// Add query parameters if provided
-				const qs: IDataObject = {};
-				if (
-					additionalFields.queryParameters &&
-					typeof additionalFields.queryParameters === 'object'
-				) {
-					const queryParams = additionalFields.queryParameters as IDataObject;
-					if (queryParams.parameters && Array.isArray(queryParams.parameters)) {
-						for (const parameter of queryParams.parameters as IDataObject[]) {
-							qs[parameter.name as string] = parameter.value;
+				// Add query parameters if provided (only if not already set by getMany operation)
+				if (operation !== 'getMany') {
+					if (
+						additionalFields.queryParameters &&
+						typeof additionalFields.queryParameters === 'object'
+					) {
+						const queryParams = additionalFields.queryParameters as IDataObject;
+						if (queryParams.parameters && Array.isArray(queryParams.parameters)) {
+							for (const parameter of queryParams.parameters as IDataObject[]) {
+								qs[parameter.name as string] = parameter.value;
+							}
 						}
 					}
 				}
@@ -280,6 +419,7 @@ export class GPortalEntityApi implements INodeType {
 				this.logger.info(`credentials: ${JSON.stringify(credentials)}`);
 				this.logger.info('========================');
 
+				// Include body for POST and PATCH requests
 				if (method !== 'GET' && method !== 'DELETE') {
 					requestOptions.body = body;
 					this.logger.info(`Request Body: ${JSON.stringify(body)}`);
