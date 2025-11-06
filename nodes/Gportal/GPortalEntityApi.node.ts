@@ -175,6 +175,19 @@ export class GPortalEntityApi implements INodeType {
 				description: 'Max number of results to return',
 			},
 			{
+				displayName: 'Version',
+				name: 'version',
+				type: 'string',
+				default: '0',
+				displayOptions: {
+					show: {
+						operation: ['getMany'],
+						resource: ['entity'],
+					},
+				},
+				description: 'Version to include in search fields',
+			},
+			{
 				displayName: 'Additional Fields',
 				name: 'additionalFields',
 				type: 'collection',
@@ -289,12 +302,20 @@ export class GPortalEntityApi implements INodeType {
 						const searchParameters =
 							this.getNodeParameter('searchParameters', i) || ('{}' as string);
 						const limit = this.getNodeParameter('limit', i) as number | undefined;
+						const version = this.getNodeParameter('version', i) as string | undefined;
 
 						endpoint = '/generic-entities';
 						// Parse and structure search parameters
-						if (searchParameters) {
-							let searchFields: IDataObject = {};
+						let searchFields: IDataObject = {
+							name: entityName,
+						};
 
+						// Add version to searchFields if provided
+						if (version !== undefined && version !== null && version !== '') {
+							searchFields.version = version;
+						}
+
+						if (searchParameters) {
 							// Try to parse search parameters
 							try {
 								const parsedParams =
@@ -304,7 +325,10 @@ export class GPortalEntityApi implements INodeType {
 
 								// Structure as { "searchFields": { "paramName": value } }
 								if (typeof parsedParams === 'object' && parsedParams !== null) {
-									searchFields = parsedParams;
+									searchFields = {
+										...searchFields,
+										...parsedParams,
+									};
 								}
 							} catch (parseError) {
 								throw new NodeOperationError(
@@ -312,18 +336,15 @@ export class GPortalEntityApi implements INodeType {
 									`Search parameters must be a valid JSON object. Parse error: ${parseError.message}`,
 								);
 							}
-
-							// const normalizedSearchField: any = {};
-							// for (const [key, value] of Object.entries(searchFields)) {
-							// 	normalizedSearchField[`value.${key}`] = value;
-							// }
-
-							// Structure search parameters as { "searchFields": { "paramName": value } } in query params
-							qs.searchFields = {
-								name: entityName,
-								...searchFields,
-							};
 						}
+
+						// const normalizedSearchField: any = {};
+						// for (const [key, value] of Object.entries(searchFields)) {
+						// 	normalizedSearchField[`value.${key}`] = value;
+						// }
+
+						// Structure search parameters as { "searchFields": { "paramName": value } } in query params
+						qs.searchFields = searchFields;
 
 						// Add limit to query parameters if provided
 						if (limit !== undefined && limit !== null) {
