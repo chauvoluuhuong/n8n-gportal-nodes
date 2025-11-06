@@ -13,8 +13,8 @@ export class GPortalQueryVectorEmbedding implements INodeType {
 		displayName: 'GPortal Query Vector Embedding',
 		name: 'gPortalQueryVectorEmbedding',
 		icon: {
-			light: 'file:icons/restApi.white.svg',
-			dark: 'file:icons/restApi.black.svg',
+			light: 'file:icons/textEmbedding.black.svg',
+			dark: 'file:icons/textEmbedding.black.svg',
 		},
 		group: ['transform'],
 		version: 1,
