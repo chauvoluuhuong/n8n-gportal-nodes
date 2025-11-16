@@ -18,7 +18,7 @@ export class GPortalQueryVectorEmbedding implements INodeType {
 		},
 		group: ['transform'],
 		version: 1,
-		description: 'Query vector embedding from GPortal API',
+		description: 'Use this API to query knowledge base',
 		defaults: {
 			name: 'GPortal Query Vector Embedding',
 		},
